@@ -2,12 +2,15 @@ package sopra_scrum_tool.gui.components.local.left;
 
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -151,34 +154,13 @@ public class LeftPanel {
 		tableModel.addColumn("Real Name");
 		table.setModel(tableModel);
 
-		// TODO: fetch team members from gitea
+		// TODO: fetch team members from gitea to fill the table
+		// TODO: get the real names by user input or load from file if already set
 
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		memberMapPanel.add(scrollPane);
-
-		memberMapPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-
-		// a panel that holds the add and remove buttons
-		JPanel buttonPanel = new JPanel();
-		memberMapPanel.add(buttonPanel);
-		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-
-		// create a button to add new projects
-		JButton addButton = new JButton("Add");
-		// addButton.setEnabled(false);
-		buttonPanel.add(addButton);
-
-		// padding between buttons
-		buttonPanel.add(Box.createRigidArea(new Dimension(5, 0)));
-
-		// create a new button to remove projects
-		JButton removeButton = new JButton("Remove");
-		removeButton.setEnabled(false);
-		buttonPanel.add(removeButton);
-
-		buttonPanel.add(Box.createHorizontalGlue());
 
 		return memberMapPanel;
 	}

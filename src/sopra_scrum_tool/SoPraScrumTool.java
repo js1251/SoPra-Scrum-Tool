@@ -7,6 +7,7 @@ import javax.swing.UIManager;
 
 import sopra_scrum_tool.gui.Gui;
 import sopra_scrum_tool.util.errorhandling.Errorhandling;
+import sopra_scrum_tool.util.gitea.Api;
 import sopra_scrum_tool.util.save_load.SaveLoad;
 
 public class SoPraScrumTool {
@@ -21,6 +22,8 @@ public class SoPraScrumTool {
 
 	public static void main(String[] args) {
 		try {
+			new Api();
+			
 			saveLoad = new SaveLoad();
 			saveLoad.loadConfig();
 			saveLoad.loadLastTeamSave();
@@ -35,6 +38,7 @@ public class SoPraScrumTool {
 					new Gui();
 				}
 			});
+			
 		} catch (Throwable exception) {
 			Errorhandling.error(exception);
 		}
