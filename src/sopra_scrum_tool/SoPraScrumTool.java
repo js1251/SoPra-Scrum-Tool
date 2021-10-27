@@ -17,6 +17,8 @@ public class SoPraScrumTool {
 
 	public static SaveLoad saveLoad;
 
+	public static int defaultFieldHeight = 25;
+
 	public static void main(String[] args) {
 		try {
 			saveLoad = new SaveLoad();

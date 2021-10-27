@@ -1,11 +1,16 @@
 package sopra_scrum_tool.util.save_load;
 
+import java.util.ArrayList;
+
 public class SoPraTeamSaveFile {
 	public static String fileExtension = ".soprateam";
 
 	private String savePath;
 	private String nameSpace;
 	private String name;
+	private ArrayList<Member> members = new ArrayList<Member>();
+	
+	// TODO: use JSONObject instead
 
 	/**
 	 * Sets the save path.
@@ -59,6 +64,24 @@ public class SoPraTeamSaveFile {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	/**
+	 * Adds a member to all memebers
+	 * 
+	 * @param member The new member.
+	 */
+	public void addMember(Member member) {
+		members.add(member);
+	}
+
+	/**
+	 * Gets a list of all members.
+	 * 
+	 * @return A list of all memebers.
+	 */
+	public ArrayList<Member> getMembers() {
+		return members;
 	}
 
 	/**

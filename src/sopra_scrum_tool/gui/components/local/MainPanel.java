@@ -6,7 +6,9 @@ import java.awt.Dimension;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.border.EtchedBorder;
+
+import sopra_scrum_tool.gui.components.local.left.LeftPanel;
+import sopra_scrum_tool.gui.components.local.right.RightPanel;
 
 public class MainPanel {
 	private JPanel mainPanel;
@@ -23,7 +25,6 @@ public class MainPanel {
 	 */
 	public JPanel create() {
 		mainPanel = new JPanel();
-		mainPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		mainPanel.setPreferredSize(new Dimension(10, 10));
 
@@ -32,20 +33,18 @@ public class MainPanel {
 		splitPane.setAlignmentY(Component.CENTER_ALIGNMENT);
 		splitPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 		mainPanel.add(splitPane);
-		
+
 		createLeft();
 		createRight();
 
 		return mainPanel;
 	}
-	
+
 	private void createLeft() {
-		JPanel leftPanel = new JPanel();
-		splitPane.setLeftComponent(leftPanel);
+		splitPane.setLeftComponent(new LeftPanel().create());
 	}
-	
+
 	private void createRight() {
-		JPanel rightPanel = new JPanel();
-		splitPane.setRightComponent(rightPanel);		
+		splitPane.setRightComponent(new RightPanel().create());
 	}
 }
