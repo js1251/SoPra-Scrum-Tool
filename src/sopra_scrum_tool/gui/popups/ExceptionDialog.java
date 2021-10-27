@@ -1,4 +1,4 @@
-package sopra_scrum_tool.gui;
+package sopra_scrum_tool.gui.popups;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

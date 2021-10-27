@@ -3,7 +3,7 @@ package sopra_scrum_tool.util.errorhandling;
 import javax.swing.JOptionPane;
 
 import sopra_scrum_tool.SoPraScrumTool;
-import sopra_scrum_tool.gui.ExceptionDialog;
+import sopra_scrum_tool.gui.popups.ExceptionDialog;
 
 public class Errorhandling {
 	
