@@ -2,6 +2,7 @@ package sopra_scrum_tool.gui.components.local.right;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -9,6 +10,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 
 import sopra_scrum_tool.SoPraScrumTool;
+import sopra_scrum_tool.util.save_load.Member;
 
 public class RightPanel {
 
@@ -19,6 +21,7 @@ public class RightPanel {
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		mainPanel.setBorder(new TitledBorder(null, "Sprint Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		
+		// TODO: add a new Tab per memeber
 		ArrayList<Member> members = SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getMembers();
 
 		mainPanel.add(createSprintTabs());
