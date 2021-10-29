@@ -19,15 +19,17 @@ public class SoPraScrumTool {
 	public static SaveLoad saveLoad;
 
 	public static int defaultFieldHeight = 25;
+	public static int defaultPadding = 5;
 
 	public static void main(String[] args) {
 		try {
-			new Api();
 			
 			saveLoad = new SaveLoad();
 			saveLoad.loadConfig();
 			saveLoad.loadLastTeamSave();
 
+			new Api();
+			
 			// load the saved look and feel. If its not yet saved default to cross platform
 			String lookAndFeel = saveLoad.getCurrentConfig().getLookAndFeel();
 			lookAndFeel = lookAndFeel != null ? lookAndFeel : UIManager.getCrossPlatformLookAndFeelClassName();

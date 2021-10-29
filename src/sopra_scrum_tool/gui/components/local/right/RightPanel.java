@@ -10,7 +10,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 
 import sopra_scrum_tool.SoPraScrumTool;
-import sopra_scrum_tool.util.save_load.Member;
+import sopra_scrum_tool.util.sopra.Member;
 
 public class RightPanel {
 

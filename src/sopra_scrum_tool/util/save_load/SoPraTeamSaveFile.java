@@ -2,12 +2,16 @@ package sopra_scrum_tool.util.save_load;
 
 import java.util.ArrayList;
 
+import sopra_scrum_tool.util.sopra.Member;
+import sopra_scrum_tool.util.time.WeeklyDate;
+
 public class SoPraTeamSaveFile {
 	public static String fileExtension = ".soprateam";
 
 	private String savePath;
 	private String nameSpace;
 	private String name;
+	private WeeklyDate date = new WeeklyDate();
 	private ArrayList<Member> members = new ArrayList<Member>();
 	
 	// TODO: use JSONObject instead
@@ -64,6 +68,14 @@ public class SoPraTeamSaveFile {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	public void setDate(WeeklyDate date) {
+		this.date = date;
+	}
+	
+	public WeeklyDate getDate() {
+		return this.date;
 	}
 	
 	/**

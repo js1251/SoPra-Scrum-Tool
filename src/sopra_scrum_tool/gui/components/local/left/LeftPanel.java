@@ -4,13 +4,14 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -21,6 +22,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import sopra_scrum_tool.SoPraScrumTool;
+import sopra_scrum_tool.util.time.Weekday;
 
 public class LeftPanel {
 	private JPanel mainPanel;
@@ -55,6 +57,20 @@ public class LeftPanel {
 		JTextField nameSpaceField = new JTextField(); // TODO: get from savefile
 		nameSpaceField.setMaximumSize(new Dimension(Integer.MAX_VALUE, SoPraScrumTool.defaultFieldHeight));
 		nameSpacePanel.add(nameSpaceField);
+		
+		nameSpaceField.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				String[] currentTitle = titleLabel.getText().split("/");
+				String input = (nameSpaceField.getText() + e.getKeyChar()).replaceAll("/", "").trim();
+				titleLabel.setText(input + "/" + currentTitle[1]);
+				
+				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().setNamespace(input);
+			}
+
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+		});
 
 		return nameSpacePanel;
 	}
@@ -67,6 +83,20 @@ public class LeftPanel {
 		JTextField nameField = new JTextField(); // TODO: get from savefile
 		nameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, SoPraScrumTool.defaultFieldHeight));
 		namePanel.add(nameField);
+		
+		nameField.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				String[] currentTitle = titleLabel.getText().split("/");
+				String input = (nameField.getText() + e.getKeyChar()).replaceAll("/", "").trim();
+				titleLabel.setText(currentTitle[0] + "/" + input);
+				
+				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().setName(input);
+			}
+
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+		});
 
 		return namePanel;
 	}
@@ -76,10 +106,16 @@ public class LeftPanel {
 		whenPanel.setLayout(new BoxLayout(whenPanel, BoxLayout.X_AXIS));
 		whenPanel.setBorder(new TitledBorder(null, "Meeting date", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
-		String dayOptions[] = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
-		JComboBox<String> dayBox = new JComboBox<String>(dayOptions);
+		JComboBox<String> dayBox = new JComboBox<String>(Weekday.allFriendly());
 		dayBox.setMaximumSize(new Dimension(30, SoPraScrumTool.defaultFieldHeight));
 		whenPanel.add(dayBox);
+		dayBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Weekday selectedDay = Weekday.values()[dayBox.getSelectedIndex()];
+				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setWeekday(selectedDay);
+			}
+		});
 
 		whenPanel.add(Box.createHorizontalGlue());
 
@@ -93,6 +129,12 @@ public class LeftPanel {
 		JComboBox<String> hourBoxFrom = new JComboBox<String>(hourOptions);
 		hourBoxFrom.setMaximumSize(new Dimension(10, SoPraScrumTool.defaultFieldHeight));
 		whenPanel.add(hourBoxFrom);
+		hourBoxFrom.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setStartHour(hourBoxFrom.getSelectedIndex());
+			}
+		});
 
 		whenPanel.add(new JLabel(" : "));
 
@@ -106,18 +148,36 @@ public class LeftPanel {
 		JComboBox<String> minuteBoxFrom = new JComboBox<String>(minuteOptions);
 		minuteBoxFrom.setMaximumSize(new Dimension(10, SoPraScrumTool.defaultFieldHeight));
 		whenPanel.add(minuteBoxFrom);
+		minuteBoxFrom.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setStartMinute(minuteBoxFrom.getSelectedIndex());
+			}
+		});
 
 		whenPanel.add(new JLabel("     -     "));
 
 		JComboBox<String> hourBoxTo = new JComboBox<String>(hourOptions);
 		hourBoxTo.setMaximumSize(new Dimension(10, SoPraScrumTool.defaultFieldHeight));
 		whenPanel.add(hourBoxTo);
+		hourBoxTo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setEndHour(hourBoxTo.getSelectedIndex());
+			}
+		});
 
 		whenPanel.add(new JLabel(" : "));
 
 		JComboBox<String> minuteBoxTo = new JComboBox<String>(minuteOptions);
 		minuteBoxTo.setMaximumSize(new Dimension(10, SoPraScrumTool.defaultFieldHeight));
 		whenPanel.add(minuteBoxTo);
+		minuteBoxTo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setEndMinute(minuteBoxTo.getSelectedIndex());
+			}
+		});
 
 		return whenPanel;
 	}
@@ -138,8 +198,7 @@ public class LeftPanel {
 	private JPanel createMemberMapPanel() {
 		JPanel memberMapPanel = new JPanel();
 		memberMapPanel.setLayout(new BoxLayout(memberMapPanel, BoxLayout.Y_AXIS));
-		memberMapPanel
-				.setBorder(new TitledBorder(null, "Team Members", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		memberMapPanel.setBorder(new TitledBorder(null, "Team Members", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
 		// a table containing the members
 		JTable table = new JTable();
@@ -161,6 +220,17 @@ public class LeftPanel {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		memberMapPanel.add(scrollPane);
+		
+		memberMapPanel.add(Box.createRigidArea(new Dimension(0, SoPraScrumTool.defaultPadding)));
+		
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+		memberMapPanel.add(buttonPanel);
+		
+		//buttonPanel.add(Box.createHorizontalGlue());
+		
+		JButton fetchMembersButton = new JButton("Fetch Members");
+		buttonPanel.add(fetchMembersButton);
 
 		return memberMapPanel;
 	}

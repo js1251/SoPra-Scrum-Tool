@@ -1,6 +1,5 @@
 package sopra_scrum_tool.util.gitea;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -14,35 +13,29 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import sopra_scrum_tool.SoPraScrumTool;
-import sopra_scrum_tool.util.errorhandling.Errorhandling;
 
 public class Api {
-	public Api() {
-		try {
-			for (String member : getMembers("sopra-ws2021", "sopra06")) {
-				long s = getTime("sopra-ws2021", "sopra06", member).getSeconds();				
-				System.out.println(member + " spent " + String.format("%dd %dh %02dm %02ds", s / 86400, (s / 3600) % 24, (s % 3600) / 60, (s % 60)));
-			}
-		} catch (Exception exception) {
-			Errorhandling.error(exception);
-		}
-	}
-
-	public static String GET(String url) throws IOException, InterruptedException {
+	public static String GET(String url) throws Exception {
 		HttpClient client = HttpClient.newHttpClient();
+		
+		String fullUrl = "https://" + SoPraScrumTool.saveLoad.getCurrentConfig().getGiteaUrl() + "/api/v1/" + url;
+		
 		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create("https://" + SoPraScrumTool.saveLoad.getCurrentConfig().getGiteaUrl() + "api/v1/" + url))
+				.uri(URI.create(fullUrl))
 				.headers("accept", "application/json")
 				.headers("Authorization", "token " + SoPraScrumTool.saveLoad.getCurrentConfig().getGiteaToken())
 				.headers("Content-type", "application/json")
 				.build();
-		HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-
-		return response.body().toString();
+		try {
+			HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+			return response.body().toString();
+		} catch (Exception exception) {
+			throw new Exception("Unable to reach " + fullUrl + ". Invalid token?");
+		}
+		
 	}
 
-	public static ArrayList<String> getMembers(String nameSpace, String repoName)
-			throws JSONException, InterruptedException, IOException {
+	public static ArrayList<String> getMembers(String nameSpace, String repoName) throws Exception {
 		String teamsRaw = GET("orgs/" + nameSpace + "/teams");
 		JSONArray teams = new JSONArray(teamsRaw);
 
@@ -73,7 +66,7 @@ public class Api {
 		return memberStrings;
 	}
 
-	public static Duration getTime(String nameSpace, String repoName, String username) throws IOException, InterruptedException {
+	public static Duration getTime(String nameSpace, String repoName, String username) throws Exception {
 		String timesRaw = GET("repos/" + nameSpace + "/" + repoName + "/times");
 		JSONArray times = new JSONArray(timesRaw);
 
@@ -88,12 +81,15 @@ public class Api {
 		Duration timeSpent = Duration.ofSeconds(seconds);
 		return timeSpent;
 	}
+	
+	/*
+	public static String getTimeString(String nameSpace, String repoName, String username) throws Exception {
+		long s = getTime(nameSpace, repoName, username).getSeconds();
+		int days = (int) (s / 86400f);
+		int hours = (int) (s / 3600f) % 24;
+		int minutes = (int) (s / 3600f) % 60;
+		int seconds = (int) (s) % 60;
+		return String.format("%dd %dh %02dm %02ds", days, hours, minutes, seconds);
+	}
+	*/
 }
-
-//https://git.sopranium.de/api/v1/repos/sopra-ws2122/sopra12
-//https://git.sopranium.de/api/v1/repos/sopra-ws2122/sopra12/issues
-//https://git.sopranium.de/api/v1/repos/sopra-ws2122/sopra12/issues?state=open
-//https://git.sopranium.de/api/v1/repos/sopra-ws2122/sopra12/issues?state=closed
-//https://git.sopranium.de/api/v1/repos/sopra-ws2122/sopra12/times?user_name=name
-//https://git.sopranium.de/api/v1/orgs/sopra-ws2122/teams -> get id
-//https://git.sopranium.de/api/v1/teams/ID/members <- insert id
