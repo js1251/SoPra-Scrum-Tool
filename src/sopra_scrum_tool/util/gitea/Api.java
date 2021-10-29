@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import sopra_scrum_tool.SoPraScrumTool;
 import sopra_scrum_tool.util.errorhandling.Errorhandling;
 
 public class Api {
@@ -30,9 +31,9 @@ public class Api {
 	public static String GET(String url) throws IOException, InterruptedException {
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(url))
+				.uri(URI.create("https://" + SoPraScrumTool.saveLoad.getCurrentConfig().getGiteaUrl() + "api/v1/" + url))
 				.headers("accept", "application/json")
-				.headers("Authorization", "token ee5242bf7a11ef45f847eaf5026d9968f9baf20e")
+				.headers("Authorization", "token " + SoPraScrumTool.saveLoad.getCurrentConfig().getGiteaToken())
 				.headers("Content-type", "application/json")
 				.build();
 		HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
@@ -42,7 +43,7 @@ public class Api {
 
 	public static ArrayList<String> getMembers(String nameSpace, String repoName)
 			throws JSONException, InterruptedException, IOException {
-		String teamsRaw = GET("https://git.sopranium.de/api/v1/orgs/" + nameSpace + "/teams");
+		String teamsRaw = GET("orgs/" + nameSpace + "/teams");
 		JSONArray teams = new JSONArray(teamsRaw);
 
 		int id = -1;
@@ -60,7 +61,7 @@ public class Api {
 			throw new JSONException("\"id\" is not a valid key for this JSON object");
 		}
 
-		String membersRaw = GET("https://git.sopranium.de/api/v1/teams/" + id + "/members");
+		String membersRaw = GET("teams/" + id + "/members");
 		JSONArray members = new JSONArray(membersRaw);
 
 		ArrayList<String> memberStrings = new ArrayList<String>();
@@ -73,7 +74,7 @@ public class Api {
 	}
 
 	public static Duration getTime(String nameSpace, String repoName, String username) throws IOException, InterruptedException {
-		String timesRaw = GET("https://git.sopranium.de/api/v1/repos/" + nameSpace + "/" + repoName + "/times");
+		String timesRaw = GET("repos/" + nameSpace + "/" + repoName + "/times");
 		JSONArray times = new JSONArray(timesRaw);
 
 		long seconds = 0;
