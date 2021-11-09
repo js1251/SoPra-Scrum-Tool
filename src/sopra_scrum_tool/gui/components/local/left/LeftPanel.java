@@ -6,12 +6,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -22,12 +24,17 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import sopra_scrum_tool.SoPraScrumTool;
+import sopra_scrum_tool.util.errorhandling.Errorhandling;
+import sopra_scrum_tool.util.gitea.Api;
+import sopra_scrum_tool.util.save_load.SoPraTeamSaveFile;
+import sopra_scrum_tool.util.sopra.Member;
 import sopra_scrum_tool.util.time.Weekday;
 
 public class LeftPanel {
 	private JPanel mainPanel;
-
+	
 	private JLabel titleLabel;
+	private DefaultTableModel tableModel;
 
 	public JPanel create() {
 		mainPanel = new JPanel();
@@ -208,9 +215,10 @@ public class LeftPanel {
 		table.setRowHeight(30);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		DefaultTableModel tableModel = new DefaultTableModel();
+		tableModel = new DefaultTableModel();
 		tableModel.addColumn("Gitea Name");
 		tableModel.addColumn("Real Name");
+		tableModel.addColumn("Is Tutor/ Dozent");
 		table.setModel(tableModel);
 
 		// TODO: fetch team members from gitea to fill the table
@@ -231,6 +239,44 @@ public class LeftPanel {
 		
 		JButton fetchMembersButton = new JButton("Fetch Members");
 		buttonPanel.add(fetchMembersButton);
+		
+		fetchMembersButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					// the currently open save
+					SoPraTeamSaveFile teamSave = SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave();
+					
+					// fetch the members from the repo
+					ArrayList<String> giteaNames = Api.getMembers(teamSave.getNamespace(), teamSave.getName());
+					for (String giteaName : giteaNames) {
+						// TODO: check if already a member (incase of a re-fetch e.g when member was removed) -> keep real name
+						
+						// create a new member and add it to the team
+						Member newMember = new Member();
+						newMember.setGiteaName(giteaName.trim());
+						
+						// popUp for each member that doesnt already have a real name
+						String realName = JOptionPane.showInputDialog("Please provide the real name of " + giteaName + ":");
+						if (realName == null || realName.isEmpty()) {
+							Errorhandling.error("Member fetch error", "You must provide a real name for every member. Aborting.");
+							tableModel.setNumRows(0);
+							return;
+						}
+						
+						newMember.setRealName(realName.trim());
+						teamSave.addMember(newMember);
+
+						// add a new entry in the member table
+						tableModel.addRow(new String[] {giteaName, realName.trim(), "false"});
+					}
+					
+				} catch (Exception exception) {
+					Errorhandling.error(exception);
+				}
+				
+			}
+		});
 
 		return memberMapPanel;
 	}

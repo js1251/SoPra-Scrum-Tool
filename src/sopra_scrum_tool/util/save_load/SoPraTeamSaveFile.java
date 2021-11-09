@@ -13,7 +13,7 @@ public class SoPraTeamSaveFile {
 	private String name;
 	private WeeklyDate date = new WeeklyDate();
 	private ArrayList<Member> members = new ArrayList<Member>();
-	
+
 	// TODO: use JSONObject instead
 
 	/**
@@ -69,15 +69,15 @@ public class SoPraTeamSaveFile {
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setDate(WeeklyDate date) {
 		this.date = date;
 	}
-	
+
 	public WeeklyDate getDate() {
 		return this.date;
 	}
-	
+
 	/**
 	 * Adds a member to all memebers
 	 * 
