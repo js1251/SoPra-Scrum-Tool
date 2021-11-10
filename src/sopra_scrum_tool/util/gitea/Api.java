@@ -13,26 +13,47 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import sopra_scrum_tool.SoPraScrumTool;
+import sopra_scrum_tool.util.exception.GiteaException;
 
 public class Api {
-	public static String GET(String url) throws Exception {
+	public static String GET(String url) throws NullPointerException, GiteaException {
 		HttpClient client = HttpClient.newHttpClient();
-		
 		String fullUrl = "https://" + SoPraScrumTool.saveLoad.getCurrentConfig().getGiteaUrl() + "/api/v1/" + url;
-		
+
 		HttpRequest request = HttpRequest.newBuilder()
 				.uri(URI.create(fullUrl))
 				.headers("accept", "application/json")
 				.headers("Authorization", "token " + SoPraScrumTool.saveLoad.getCurrentConfig().getGiteaToken())
 				.headers("Content-type", "application/json")
 				.build();
+
+		HttpResponse<String> response = null;
 		try {
-			HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-			return response.body().toString();
-		} catch (Exception exception) {
-			throw new Exception("Unable to reach " + fullUrl + ". Invalid token?");
+			response = client.send(request, BodyHandlers.ofString());
+		} catch (Exception e) {
+			throw new GiteaException("Unable to reach " + fullUrl + ". Invalid token?");
 		}
 		
+		// making sure response cant be null
+		if (response == null) {
+			throw new NullPointerException("Unexpected null value?!");
+		}
+		
+		String responseBody = response.body().toString();
+
+		// try parsing the message as an error message
+		try {
+			JSONObject errorJson = new JSONObject(responseBody);
+			JSONArray errors = errorJson.getJSONArray("errors");
+			String message = errorJson.getString("message");
+			
+			throw new GiteaException(message + ": " + errors.toString());
+		} catch (JSONException exception) {
+			// was not an error -> ignore.
+		}
+
+		return responseBody;
+		// throw new Exception("Unable to reach " + fullUrl + ". Invalid token?");
 	}
 
 	public static ArrayList<String> getMembers(String nameSpace, String repoName) throws Exception {
@@ -81,15 +102,13 @@ public class Api {
 		Duration timeSpent = Duration.ofSeconds(seconds);
 		return timeSpent;
 	}
-	
+
 	/*
-	public static String getTimeString(String nameSpace, String repoName, String username) throws Exception {
-		long s = getTime(nameSpace, repoName, username).getSeconds();
-		int days = (int) (s / 86400f);
-		int hours = (int) (s / 3600f) % 24;
-		int minutes = (int) (s / 3600f) % 60;
-		int seconds = (int) (s) % 60;
-		return String.format("%dd %dh %02dm %02ds", days, hours, minutes, seconds);
-	}
-	*/
+	 * public static String getTimeString(String nameSpace, String repoName, String
+	 * username) throws Exception { long s = getTime(nameSpace, repoName,
+	 * username).getSeconds(); int days = (int) (s / 86400f); int hours = (int) (s /
+	 * 3600f) % 24; int minutes = (int) (s / 3600f) % 60; int seconds = (int) (s) %
+	 * 60; return String.format("%dd %dh %02dm %02ds", days, hours, minutes,
+	 * seconds); }
+	 */
 }
