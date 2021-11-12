@@ -1,58 +1,109 @@
 package sopra_scrum_tool.util.sopra;
 
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import sopra_scrum_tool.util.gitea.Api;
 
 public class Team {
-	private String nameSpace;
-	private String repoName;
-	private ArrayList<Member> members;
+	private String owner;
+	private String repo;
+	private String tutor;
+	private HashMap<String, Member> members = new HashMap<String, Member>();
 
-	public void setNameSpace(String nameSpace) {
-		this.nameSpace = nameSpace;
+	public void setOwner(String owner) {
+		this.owner = owner;
 	}
 
-	public String getNameSpace() {
-		return this.nameSpace;
+	public String getOwner() {
+		return this.owner;
 	}
 
-	public void setRepoName(String repoName) {
-		this.repoName = repoName;
+	public void setRepo(String repo) {
+		this.repo = repo;
 	}
 
-	public String getRepoName() {
-		return this.repoName;
+	public String getRepo() {
+		return this.repo;
 	}
 
-	public void addMember(Member member) {
-		this.members.add(member);
+	public void setTutor(String tutor) {
+		this.tutor = tutor;
 	}
 
-	public void removeMember(Member member) {
-		this.members.remove(member);
+	public String getTutor() {
+		return this.tutor;
 	}
 
 	public ArrayList<Member> getAllMembers() {
-		return this.members;
+		return new ArrayList<Member>(this.members.values());
 	}
 
-	public Duration getOverallEstimate() {
-		Duration overallEstimate = Duration.ZERO;
+	public void initialize() throws Exception {
+		// find all members of this team
+		findMembers();
 
-		for (Member member : members) {
-			overallEstimate = overallEstimate.plus(member.getOverallEstimate());
-		}
-
-		return overallEstimate;
+		// fetch their times
+		getMemberTimes();
 	}
 
-	public Duration getOverallTime() {
-		Duration overallTime = Duration.ZERO;
+	private void findMembers() throws Exception {
+		// get all teams and compare their repoName
+		String endPoint = "orgs/" + this.owner + "/teams";
+		JSONArray teams = new JSONArray(Api.GET(endPoint));
 
-		for (Member member : members) {
-			overallTime = overallTime.plus(member.getOverallTime());
+		int id = -1;
+		for (int i = 0; i < teams.length(); i++) {
+			JSONObject team = teams.getJSONObject(i);
+
+			// find the id of the current repo
+			String name = team.getString("name");
+			if (name.equals(this.repo)) {
+				id = team.getInt("id");
+				break;
+			}
 		}
 
-		return overallTime;
+		if (id == -1) {
+			throw new JSONException("\"id\" is not a valid key for this JSON object");
+		}
+
+		// find all members by id
+		String membersRaw = Api.GET("teams/" + id + "/members");
+		JSONArray members = new JSONArray(membersRaw);
+
+		for (int i = 0; i < members.length(); i++) {
+			JSONObject member = members.getJSONObject(i);
+			String memberName = member.getString("username");
+
+			// ignore tutor
+			if (memberName.equals(this.tutor)) {
+				continue;
+			}
+
+			Member newMember = new Member(memberName);
+			this.members.put(memberName, newMember);
+		}
+	}
+
+	private void getMemberTimes() throws Exception {
+		// get all teams and compare their repoName
+		String endPoint = "repos/" + this.owner + "/" + this.repo + "/times";
+		JSONArray times = new JSONArray(Api.GET(endPoint));
+
+		for (int i = 0; i < times.length(); i++) {
+			JSONObject time = times.getJSONObject(i);
+			int issueId = time.getInt("issue_id");
+			int seconds = time.getInt("time");
+			String userName = time.getString("user_name");
+
+			Member member = members.get(userName);
+			member.addTime(seconds);
+		}
+
 	}
 }

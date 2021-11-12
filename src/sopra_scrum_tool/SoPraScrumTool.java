@@ -9,6 +9,7 @@ import sopra_scrum_tool.gui.Gui;
 import sopra_scrum_tool.util.errorhandling.Errorhandling;
 import sopra_scrum_tool.util.gitea.Api;
 import sopra_scrum_tool.util.save_load.SaveLoad;
+import sopra_scrum_tool.util.sopra.Team;
 
 public class SoPraScrumTool {
 	public static JFrame frame = new JFrame();
@@ -17,6 +18,7 @@ public class SoPraScrumTool {
 	public static String version = "2021.10.27";
 
 	public static SaveLoad saveLoad;
+	public static Team openTeam = new Team();
 
 	public static int defaultFieldHeight = 25;
 	public static int defaultPadding = 5;
@@ -26,7 +28,6 @@ public class SoPraScrumTool {
 			
 			saveLoad = new SaveLoad();
 			saveLoad.loadConfig();
-			saveLoad.loadLastTeamSave();
 
 			new Api();
 			

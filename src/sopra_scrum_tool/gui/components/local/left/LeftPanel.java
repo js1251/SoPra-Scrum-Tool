@@ -4,14 +4,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -24,10 +22,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import sopra_scrum_tool.SoPraScrumTool;
-import sopra_scrum_tool.util.errorhandling.Errorhandling;
-import sopra_scrum_tool.util.gitea.Api;
-import sopra_scrum_tool.util.save_load.SoPraTeamSaveFile;
-import sopra_scrum_tool.util.sopra.Member;
+import sopra_scrum_tool.gui.components.local.left.listeners.UpdateMemberButtonListener;
+import sopra_scrum_tool.util.sopra.Sprint;
 import sopra_scrum_tool.util.time.Weekday;
 
 public class LeftPanel {
@@ -35,7 +31,7 @@ public class LeftPanel {
 	
 	private JLabel titleLabel;
 	private DefaultTableModel tableModel;
-	JTextField nameSpaceField, nameField;
+	JTextField nameSpaceField, nameField, tutorField;
 
 	public JPanel create() {
 		mainPanel = new JPanel();
@@ -51,6 +47,7 @@ public class LeftPanel {
 		mainPanel.add(createNamePanel());
 		mainPanel.add(createWhenPanel());
 		mainPanel.add(createWherePanel());
+		mainPanel.add(createTutorPanel());
 		mainPanel.add(createMemberMapPanel());
 
 		return mainPanel;
@@ -99,9 +96,9 @@ public class LeftPanel {
 		titleLabel.setText(left? input + "/" + currentTitle[1] : currentTitle[0] + "/" + input);
 		
 		if (left) {
-			SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().setNamespace(input);
+			SoPraScrumTool.openTeam.setOwner(input);
 		} else {
-			SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().setName(input);
+			SoPraScrumTool.openTeam.setRepo(input);
 		}
 	}
 
@@ -117,7 +114,7 @@ public class LeftPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Weekday selectedDay = Weekday.values()[dayBox.getSelectedIndex()];
-				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setWeekday(selectedDay);
+				Sprint.weeklyDate.setWeekday(selectedDay);
 			}
 		});
 
@@ -136,7 +133,7 @@ public class LeftPanel {
 		hourBoxFrom.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setStartHour(hourBoxFrom.getSelectedIndex());
+				Sprint.weeklyDate.setStartHour(hourBoxFrom.getSelectedIndex());
 			}
 		});
 
@@ -155,7 +152,7 @@ public class LeftPanel {
 		minuteBoxFrom.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setStartMinute(minuteBoxFrom.getSelectedIndex());
+				Sprint.weeklyDate.setStartMinute(minuteBoxFrom.getSelectedIndex());
 			}
 		});
 
@@ -167,7 +164,7 @@ public class LeftPanel {
 		hourBoxTo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setEndHour(hourBoxTo.getSelectedIndex());
+				Sprint.weeklyDate.setEndHour(hourBoxTo.getSelectedIndex());
 			}
 		});
 
@@ -179,7 +176,7 @@ public class LeftPanel {
 		minuteBoxTo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getDate().setEndMinute(minuteBoxTo.getSelectedIndex());
+				Sprint.weeklyDate.setEndMinute(minuteBoxTo.getSelectedIndex());
 			}
 		});
 
@@ -192,11 +189,24 @@ public class LeftPanel {
 		wherePanel.setBorder(
 				new TitledBorder(null, "Meeting location", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
-		JTextField nameField = new JTextField(); // TODO: get from savefile
-		nameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, SoPraScrumTool.defaultFieldHeight));
-		wherePanel.add(nameField);
+		JTextField whereField = new JTextField(); // TODO: get from savefile
+		whereField.setMaximumSize(new Dimension(Integer.MAX_VALUE, SoPraScrumTool.defaultFieldHeight));
+		wherePanel.add(whereField);
 
 		return wherePanel;
+	}
+	
+	private JPanel createTutorPanel() {
+		JPanel tutorPanel = new JPanel();
+		tutorPanel.setLayout(new BoxLayout(tutorPanel, BoxLayout.X_AXIS));
+		tutorPanel.setBorder(new TitledBorder(null, "Tutor", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+
+		tutorField = new JTextField(); // TODO: get from savefile
+		tutorField.setEditable(false);
+		tutorField.setMaximumSize(new Dimension(Integer.MAX_VALUE, SoPraScrumTool.defaultFieldHeight));
+		tutorPanel.add(tutorField);
+
+		return tutorPanel;
 	}
 
 	private JPanel createMemberMapPanel() {
@@ -213,9 +223,12 @@ public class LeftPanel {
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		tableModel = new DefaultTableModel();
-		tableModel.addColumn("Gitea Name");
-		tableModel.addColumn("Real Name");
-		tableModel.addColumn("Is Tutor/ Dozent");
+		tableModel.addColumn("Name");
+		tableModel.addColumn("Total est");
+		tableModel.addColumn("Total valid est");
+		tableModel.addColumn("Total time");
+		tableModel.addColumn("Total valid time");
+		//tableModel.addColumn("Avg weekly est");
 		table.setModel(tableModel);
 
 		// TODO: fetch team members from gitea to fill the table
@@ -234,46 +247,10 @@ public class LeftPanel {
 		
 		//buttonPanel.add(Box.createHorizontalGlue());
 		
-		JButton fetchMembersButton = new JButton("Fetch Members");
-		buttonPanel.add(fetchMembersButton);
+		JButton updateMembersButton = new JButton("Update Member Data");
+		buttonPanel.add(updateMembersButton);
 		
-		fetchMembersButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					// the currently open save
-					SoPraTeamSaveFile teamSave = SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave();
-					
-					// fetch the members from the repo
-					ArrayList<String> giteaNames = Api.getMembers(teamSave.getNamespace(), teamSave.getName());
-					for (String giteaName : giteaNames) {
-						// TODO: check if already a member (incase of a re-fetch e.g when member was removed) -> keep real name
-						
-						// create a new member and add it to the team
-						Member newMember = new Member();
-						newMember.setGiteaName(giteaName.trim());
-						
-						// popUp for each member that doesnt already have a real name
-						String realName = JOptionPane.showInputDialog("Please provide the real name of " + giteaName + ":");
-						if (realName == null || realName.isEmpty()) {
-							Errorhandling.error("Member fetch error", "You must provide a real name for every member. Aborting.");
-							tableModel.setNumRows(0);
-							return;
-						}
-						
-						newMember.setRealName(realName.trim());
-						teamSave.addMember(newMember);
-
-						// add a new entry in the member table
-						tableModel.addRow(new String[] {giteaName, realName.trim(), "false"});
-					}
-					
-				} catch (Exception exception) {
-					Errorhandling.error(exception);
-				}
-				
-			}
-		});
+		updateMembersButton.addActionListener(new UpdateMemberButtonListener(tutorField, tableModel));
 
 		return memberMapPanel;
 	}

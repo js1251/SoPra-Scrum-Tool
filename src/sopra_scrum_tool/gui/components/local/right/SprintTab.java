@@ -15,28 +15,24 @@ import sopra_scrum_tool.util.sopra.Member;
 public class SprintTab {
 	private JPanel mainPanel;
 
-	public SprintTab() {
-
-	}
-
 	public JPanel create() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-		
+
 		JPanel attendancePanel = new JPanel();
 		attendancePanel.setLayout(new BoxLayout(attendancePanel, BoxLayout.X_AXIS));
 		attendancePanel.setBorder(new TitledBorder(null, "Attendance", TitledBorder.TOP, TitledBorder.TOP, null, null));
 		mainPanel.add(attendancePanel);
-		
+
 		JTabbedPane memberTabs = new JTabbedPane();
-		
-		for (Member teamMember : SoPraScrumTool.saveLoad.getCurrentSoPraTeamSave().getMembers()) {
-			attendancePanel.add(new JCheckBox(teamMember.getRealName()));
+
+		for (Member teamMember : SoPraScrumTool.openTeam.getAllMembers()) {
+			attendancePanel.add(new JCheckBox(teamMember.getName()));
 			attendancePanel.add(Box.createRigidArea(new Dimension(SoPraScrumTool.defaultPadding, 0)));
 			attendancePanel.add(Box.createHorizontalGlue());
-			memberTabs.addTab(teamMember.getRealName(), new JPanel());
+			memberTabs.addTab(teamMember.getName(), new JPanel());
 		}
-		
+
 		mainPanel.add(memberTabs);
 
 		return mainPanel;

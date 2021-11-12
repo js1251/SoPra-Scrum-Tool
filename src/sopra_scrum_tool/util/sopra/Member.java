@@ -4,66 +4,50 @@ import java.time.Duration;
 
 public class Member {
 
-	private String giteaName;
-	private String realName;
-	// TODO: points, estimate, actual time, etc.
-	// TODO: use JSONObject instead ?
-	// TODO: add toString()
-	// TODO: add fromString()
+	private String name;
+	private int points;
+	private Duration estimate = Duration.ZERO;
+	private Duration validEstimate = Duration.ZERO;
+	private Duration time = Duration.ZERO;
+	private Duration validTime = Duration.ZERO;
 
-	public void setGiteaName(String giteaName) {
-		this.giteaName = giteaName;
-	}
-
-	public String getGiteaName() {
-		return giteaName;
+	public Member(String name) {
+		this.name = name;
 	}
 
-	public void setRealName(String realName) {
-		this.realName = realName;
+	public String getName() {
+		return this.name;
 	}
 
-	public String getRealName() {
-		return realName;
+	public void addTime(int seconds) {
+		time = time.plusSeconds(seconds);
 	}
-	
-	public Duration getOverallEstimate() {
-		// TODO: implement
-		return Duration.ZERO;
+
+	public Duration getTime() {
+		return this.time;
 	}
-	
-	public Duration getOverallTime() {
-		// TODO: implement
-		return Duration.ZERO;
+
+	public void addValidTime(int seconds) {
+		validTime = validTime.plusSeconds(seconds);
 	}
-	
-	public Duration getEstimate(Sprint sprint) {
-		// TODO: implement
-		return Duration.ZERO;
+
+	public Duration getValidTime() {
+		return this.validTime;
 	}
-	
-	public Duration getTime(Sprint sprint) {
-		// TODO: implement
-		return Duration.ZERO;
+
+	public void addEstimate(int seconds) {
+		estimate = estimate.plusSeconds(seconds);
 	}
-	
-	public Duration getEstimate(Issue issue) {
-		// TODO: implement
-		return Duration.ZERO;
+
+	public Duration getEstimate() {
+		return this.estimate;
 	}
-	
-	public Duration getTime(Issue issue) {
-		// TODO: implement
-		return Duration.ZERO;
+
+	public void addValidEstimate(int seconds) {
+		validEstimate = validEstimate.plusSeconds(seconds);
 	}
-	
-	public float getOverallPoints() {
-		// TODO: implement
-		return 0;
-	}
-	
-	public float getPoints(Sprint sprint) {
-		// TODO: implement
-		return 0;
+
+	public Duration getValidEstimate() {
+		return this.validEstimate;
 	}
 }

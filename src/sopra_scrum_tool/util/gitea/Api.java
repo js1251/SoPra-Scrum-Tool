@@ -47,18 +47,18 @@ public class Api {
 			JSONArray errors = errorJson.getJSONArray("errors");
 			String message = errorJson.getString("message");
 			
-			throw new GiteaException(message + ": " + errors.toString());
+			throw new GiteaException(fullUrl + "\n" + message + ": " + errors.toString());
 		} catch (JSONException exception) {
 			// was not an error -> ignore.
 		}
 
 		return responseBody;
-		// throw new Exception("Unable to reach " + fullUrl + ". Invalid token?");
 	}
 
 	public static ArrayList<String> getMembers(String nameSpace, String repoName) throws Exception {
-		String teamsRaw = GET("orgs/" + nameSpace + "/teams");
-		JSONArray teams = new JSONArray(teamsRaw);
+		// TODO: get users of repo directly somehow
+		String endPoint = "orgs/" + nameSpace + "/teams";
+		JSONArray teams = new JSONArray(GET(endPoint));
 
 		int id = -1;
 		for (int i = 0; i < teams.length(); i++) {
@@ -85,6 +85,11 @@ public class Api {
 		}
 
 		return memberStrings;
+	}
+	
+	public static String getCurrentUser() throws Exception {
+		JSONObject user = new JSONObject(GET("user"));
+		return user.getString("username");
 	}
 
 	public static Duration getTime(String nameSpace, String repoName, String username) throws Exception {

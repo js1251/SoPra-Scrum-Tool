@@ -3,11 +3,15 @@ package sopra_scrum_tool.util.sopra;
 import java.util.ArrayList;
 import java.util.Date;
 
+import sopra_scrum_tool.util.time.WeeklyDate;
+
 public class Sprint {
 	private int number;
 	private String name;
 	private Date start;
 	private Date end;
+
+	public static WeeklyDate weeklyDate = new WeeklyDate();
 
 	private ArrayList<Issue> issues;
 
